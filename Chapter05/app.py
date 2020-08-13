@@ -27,7 +27,7 @@ connection = MongoClient("mongodb://localhost:27017/")
 
 db = MongoAlchemy()
 
-mongo=PyMongo(app)
+mongo=PyMongo(app) #必须配置参数MONGO_URI 否者会报错
 # Initialize Database
 def create_mongodatabase():
     try:

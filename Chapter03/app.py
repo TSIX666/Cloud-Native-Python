@@ -1,20 +1,24 @@
 from flask import Flask, render_template, request, jsonify, redirect, session
 from flask import abort
-from flask_cors import CORS, cross_origin
+# from flask_cors import CORS, cross_origin
 from flask import make_response, url_for
 import json
 from time import gmtime, strftime
 import sqlite3
-
+import os
 
 
 app = Flask(__name__)
 app.config.from_object(__name__)
 app.secret_key = 'F12Zr47j\3yX R~X@H!jmM]Lwf/,?KT'
-CORS(app)
+#绝对路径查找数据库 防止找不到对应库
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+db_path = os.path.join(BASE_DIR, 'mydb.db')
+app.config["DATABASE"] = db_path
+# CORS(app)
 
 def list_users():
-    conn = sqlite3.connect('mydb.db')
+    conn = sqlite3.connect(app.config["DATABASE"])
     print ("Opened database successfully");
     api_list=[]
     cursor = conn.execute("SELECT username, full_name,  email, password, id from users")
@@ -32,7 +36,7 @@ def list_users():
 
 def list_user(user_id):
     print (user_id)
-    conn = sqlite3.connect('mydb.db')
+    conn = sqlite3.connect(app.config["DATABASE"] )
     print ("Opened database successfully");
     api_list=[]
     cursor=conn.cursor()
@@ -56,7 +60,7 @@ def list_user(user_id):
 
 def list_tweet(user_id):
     print (user_id)
-    conn = sqlite3.connect('mydb.db')
+    conn = sqlite3.connect(app.config["DATABASE"] )
     print ("Opened database successfully");
     api_list=[]
     cursor=conn.cursor()
@@ -77,7 +81,7 @@ def list_tweet(user_id):
     return jsonify(user)
 
 def add_user(new_user):
-    conn = sqlite3.connect('mydb.db')
+    conn = sqlite3.connect(app.config["DATABASE"] )
     print ("Opened database successfully");
     api_list=[]
     cursor=conn.cursor()
@@ -86,6 +90,7 @@ def add_user(new_user):
     if len(data) != 0:
         abort(409)
     else:
+
        cursor.execute("insert into users (username, email, password, full_name) values(?,?,?,?)",(new_user['username'],new_user['email'], new_user['password'], new_user['name']))
        conn.commit()
        return "Success"
@@ -94,7 +99,7 @@ def add_user(new_user):
 
 
 def del_user(del_user):
-    conn = sqlite3.connect('mydb.db')
+    conn = sqlite3.connect(app.config["DATABASE"] )
     print ("Opened database successfully");
     cursor=conn.cursor()
     cursor.execute("SELECT * from users where username=? ",(del_user,))
@@ -108,7 +113,7 @@ def del_user(del_user):
        return "Success"
 
 def list_tweets():
-    conn = sqlite3.connect('mydb.db')
+    conn = sqlite3.connect(app.config["DATABASE"] )
     print ("Opened database successfully");
     api_list=[]
     cursor=conn.cursor()
@@ -135,7 +140,7 @@ def list_tweets():
     return jsonify({'tweets_list': api_list})
 
 def add_tweet(new_tweets):
-    conn = sqlite3.connect('mydb.db')
+    conn = sqlite3.connect(app.config["DATABASE"] )
     print ("Opened database successfully");
     cursor=conn.cursor()
     cursor.execute("SELECT * from users where username=? ",(new_tweets['username'],))
@@ -149,7 +154,7 @@ def add_tweet(new_tweets):
        return "Success"
 
 def upd_user(user):
-    conn = sqlite3.connect('mydb.db')
+    conn = sqlite3.connect(app.config["DATABASE"] )
     print ("Opened database successfully");
     cursor=conn.cursor()
     cursor.execute("SELECT * from users where id=? ",(user['id'],))
@@ -208,7 +213,7 @@ def addtweetjs():
 
 @app.route("/api/v1/info")
 def home_index():
-    conn = sqlite3.connect('mydb.db')
+    conn = sqlite3.connect(app.config["DATABASE"] )
     print ("Opened database successfully");
     api_list=[]
     cursor = conn.execute("SELECT buildtime, version, methods, links from apirelease")
